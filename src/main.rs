@@ -1,4 +1,6 @@
+use std::io::{Read, Write};
 use std::net::TcpListener;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -8,8 +10,12 @@ fn main() {
 
     for stream in listener.incoming() {
         match stream {
-            Ok(_stream) => {
+            Ok(mut _stream) => {
                 println!("accepted new connection");
+                let mut ping_buf = [0; 512];
+                _stream.read(&mut ping_buf).unwrap();
+                let pong_str = "+PONG\r\n";
+                _stream.write(&pong_str.as_bytes()).expect("Pong message err");
             }
             Err(e) => {
                 println!("error: {}", e);
